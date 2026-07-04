@@ -35,9 +35,21 @@ export function useCreateTask() {
 
   return useMutation({
     mutationFn: (task: TaskInsert) => taskService.createTask(task),
-    onSuccess: () => {
+    onSuccess: async (data) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.lists() })
       toast.success('Task created successfully')
+
+      // Notify the assignee if this was an admin-assigned task (not a personal task)
+      if (data.task_type === 'assigned' && data.assigned_to && data.assigned_by) {
+        const supabase = createClient()
+        await supabase.from('notifications').insert({
+          user_id: data.assigned_to,
+          title: 'New Task Assigned',
+          message: `You've been assigned a new task: "${data.title}"`,
+          type: 'task_assigned',
+          related_task_id: data.id,
+        })
+      }
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to create task')
@@ -196,6 +208,14 @@ export function useCalendarTasks(userId: string, role: string) {
   return useQuery({
     queryKey: [...queryKeys.tasks.all, 'calendar', userId, role],
     queryFn: () => taskService.getTasksForCalendar(userId, role),
+    enabled: !!userId,
+  })
+
+}
+export function useActiveAssignedTasks(userId: string) {
+  return useQuery({
+    queryKey: [...queryKeys.tasks.all, 'active-assigned', userId],
+    queryFn: () => taskService.getActiveAssignedTasks(userId),
     enabled: !!userId,
   })
 }

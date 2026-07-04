@@ -186,4 +186,17 @@ export const taskService = {
     if (error) throw error
     return data as unknown as TaskWithProfiles[]
   },
+  async getActiveAssignedTasks(userId: string): Promise<TaskWithProfiles[]> {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from('tasks')
+      .select(`*, assigned_by_profile:profiles!tasks_assigned_by_fkey(*)`)
+      .eq('assigned_to', userId)
+      .eq('task_type', 'assigned')
+      .not('status', 'in', '(completed,approved,locked)')
+      .order('deadline', { ascending: true })
+
+    if (error) throw error
+    return data as unknown as TaskWithProfiles[]
+  },
 }

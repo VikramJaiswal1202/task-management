@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useCurrentUser } from '@/hooks/use-current-user'
 import { TaskForm } from '@/components/features/tasks/task-form'
+import { AssignedToYou } from '@/components/features/dashboard/assigned-to-you'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 
@@ -13,7 +14,7 @@ export default function DashboardPage() {
   if (isLoading) return <p>Loading...</p>
 
   return (
-    <div>
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold">Dashboard</h1>
@@ -24,6 +25,8 @@ export default function DashboardPage() {
           New Task
         </Button>
       </div>
+
+      <AssignedToYou />
 
       <TaskForm open={formOpen} onOpenChange={setFormOpen} />
     </div>
