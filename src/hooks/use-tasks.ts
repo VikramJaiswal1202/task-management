@@ -6,6 +6,14 @@ import { queryKeys } from '@/lib/store/query-keys'
 import { TaskInsert, TaskUpdate } from '@/types'
 import { toast } from 'sonner'
 
+import { activityService } from '@/services/activity.service'
+import { createClient } from '@/lib/supabase/client'
+
+async function getCurrentUserId(): Promise<string | null> {
+  const supabase = createClient()
+  const { data } = await supabase.auth.getUser()
+  return data.user?.id ?? null
+}
 export function useTasks(userId: string, role: string, filters: TaskFilters = {}) {
   return useQuery({
     queryKey: queryKeys.tasks.list({ userId, role, ...filters }),
@@ -43,10 +51,21 @@ export function useUpdateTask() {
   return useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: TaskUpdate }) =>
       taskService.updateTask(id, updates),
-    onSuccess: (_, variables) => {
+    onSuccess: async (data, variables) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.lists() })
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.detail(variables.id) })
       toast.success('Task updated')
+
+      const userId = await getCurrentUserId()
+      if (userId) {
+        activityService.logActivity({
+          user_id: userId,
+          action: 'task_updated',
+          entity_type: 'task',
+          entity_id: variables.id,
+          metadata: variables.updates,
+        })
+      }
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Failed to update task')
@@ -59,12 +78,14 @@ export function useDeleteTask() {
 
   return useMutation({
     mutationFn: (id: string) => taskService.deleteTask(id),
-    onSuccess: () => {
+    onSuccess: async (_, id) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.lists() })
       toast.success('Task deleted')
-    },
-    onError: (error: Error) => {
-      toast.error(error.message || 'Failed to delete task')
+
+      const userId = await getCurrentUserId()
+      if (userId) {
+        activityService.logActivity({ user_id: userId, action: 'task_deleted', entity_type: 'task', entity_id: id })
+      }
     },
   })
 }
@@ -90,9 +111,14 @@ export function useLockTask() {
 
   return useMutation({
     mutationFn: (id: string) => taskService.lockTask(id),
-    onSuccess: () => {
+    onSuccess: async (_, id) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.lists() })
       toast.success('Task locked')
+
+      const userId = await getCurrentUserId()
+      if (userId) {
+        activityService.logActivity({ user_id: userId, action: 'task_locked', entity_type: 'task', entity_id: id })
+      }
     },
   })
 }
@@ -102,9 +128,14 @@ export function useUnlockTask() {
 
   return useMutation({
     mutationFn: (id: string) => taskService.unlockTask(id),
-    onSuccess: () => {
+    onSuccess: async (_, id) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.tasks.lists() })
       toast.success('Task unlocked')
+
+      const userId = await getCurrentUserId()
+      if (userId) {
+        activityService.logActivity({ user_id: userId, action: 'task_unlocked', entity_type: 'task', entity_id: id })
+      }
     },
   })
 }
@@ -158,5 +189,13 @@ export function useRecentTasks(limit = 5) {
   return useQuery({
     queryKey: [...queryKeys.tasks.all, 'recent', limit],
     queryFn: () => taskService.getRecentTasks(limit),
+  })
+}
+
+export function useCalendarTasks(userId: string, role: string) {
+  return useQuery({
+    queryKey: [...queryKeys.tasks.all, 'calendar', userId, role],
+    queryFn: () => taskService.getTasksForCalendar(userId, role),
+    enabled: !!userId,
   })
 }

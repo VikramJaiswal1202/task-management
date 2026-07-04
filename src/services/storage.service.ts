@@ -45,4 +45,19 @@ export const storageService = {
     const { error } = await supabase.storage.from('task-attachments').remove([path])
     if (error) throw error
   },
+  async uploadAvatar(file: File, userId: string): Promise<string> {
+    const supabase = createClient()
+    const fileExt = file.name.split('.').pop()
+    const filePath = `${userId}/avatar.${fileExt}`
+
+    const { error } = await supabase.storage.from('avatars').upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: true, // overwrite previous avatar
+    })
+
+    if (error) throw error
+
+    const { data } = supabase.storage.from('avatars').getPublicUrl(filePath)
+    return data.publicUrl
+  },
 }

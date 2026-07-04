@@ -21,7 +21,6 @@ export const taskService = {
         created_by_profile:profiles!tasks_created_by_fkey(*)
       `)
 
-    // Non-admins only see their own tasks (RLS also enforces this server-side)
     if (role !== 'admin') {
       query = query.or(`assigned_to.eq.${userId},created_by.eq.${userId}`)
     }
@@ -35,8 +34,20 @@ export const taskService = {
     if (filters.assignedTo && filters.assignedTo !== 'all') {
       query = query.eq('assigned_to', filters.assignedTo)
     }
+
     if (filters.search) {
-      query = query.or(`title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`)
+      // Find users whose name/email matches, so we can also match tasks assigned to them
+      const { data: matchingUsers } = await supabase
+        .from('profiles')
+        .select('id')
+        .or(`full_name.ilike.%${filters.search}%,email.ilike.%${filters.search}%`)
+
+      const userIds = matchingUsers?.map((u) => u.id) ?? []
+      const userFilter = userIds.length > 0 ? `,assigned_to.in.(${userIds.join(',')})` : ''
+
+      query = query.or(
+        `title.ilike.%${filters.search}%,description.ilike.%${filters.search}%${userFilter}`
+      )
     }
 
     switch (filters.sortBy) {
@@ -157,6 +168,21 @@ export const taskService = {
       .order('created_at', { ascending: false })
       .limit(limit)
 
+    if (error) throw error
+    return data as unknown as TaskWithProfiles[]
+  },
+  async getTasksForCalendar(userId: string, role: string): Promise<TaskWithProfiles[]> {
+    const supabase = createClient()
+
+    let query = supabase
+      .from('tasks')
+      .select(`*, assigned_to_profile:profiles!tasks_assigned_to_fkey(*)`)
+
+    if (role !== 'admin') {
+      query = query.or(`assigned_to.eq.${userId},created_by.eq.${userId}`)
+    }
+
+    const { data, error } = await query
     if (error) throw error
     return data as unknown as TaskWithProfiles[]
   },

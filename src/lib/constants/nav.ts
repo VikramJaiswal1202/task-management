@@ -17,9 +17,9 @@ export const userNavItems = [
   { title: 'Notifications', href: '/dashboard/notifications', icon: Bell },
   { title: 'Settings', href: '/dashboard/settings', icon: Settings },
 ]
-
 export const adminNavItems = [
   { title: 'Dashboard', href: '/admin', icon: LayoutDashboard },
+  { title: 'My Tasks', href: '/dashboard/tasks', icon: ListTodo },
   { title: 'All Tasks', href: '/admin/tasks', icon: ListTodo },
   { title: 'Reports', href: '/admin/reports', icon: FileText },
   { title: 'Users', href: '/admin/users', icon: Users },

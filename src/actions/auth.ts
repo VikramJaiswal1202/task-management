@@ -50,12 +50,23 @@ export async function login(formData: FormData) {
 
   if (error) return { error: error.message }
 
+  const { data: authData } = await supabase.auth.getUser()
+  if (authData.user) {
+    await supabase.from('activity_logs').insert({ user_id: authData.user.id, action: 'login' })
+  }
+
   revalidatePath('/', 'layout')
   redirect(redirectTo)
 }
 
 export async function logout() {
   const supabase = await createClient()
+
+  const { data: authData } = await supabase.auth.getUser()
+  if (authData.user) {
+    await supabase.from('activity_logs').insert({ user_id: authData.user.id, action: 'logout' })
+  }
+
   await supabase.auth.signOut()
   revalidatePath('/', 'layout')
   redirect('/login')
@@ -96,4 +107,3 @@ export async function resetPassword(formData: FormData) {
 
   redirect('/login')
 }
-

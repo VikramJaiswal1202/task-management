@@ -103,4 +103,73 @@ export const analyticsService = {
     })
     return Object.entries(counts).map(([month, count]) => ({ month, count }))
   },
+  async getUserTasksByStatus(userId: string) {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from('tasks')
+      .select('status')
+      .or(`assigned_to.eq.${userId},created_by.eq.${userId}`)
+    if (error) throw error
+
+    const counts: Record<string, number> = {}
+    data.forEach((t) => {
+      counts[t.status] = (counts[t.status] ?? 0) + 1
+    })
+    return Object.entries(counts).map(([status, count]) => ({ status, count }))
+  },
+
+  async getUserTasksByPriority(userId: string) {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from('tasks')
+      .select('priority')
+      .or(`assigned_to.eq.${userId},created_by.eq.${userId}`)
+    if (error) throw error
+
+    const counts: Record<string, number> = {}
+    data.forEach((t) => {
+      counts[t.priority] = (counts[t.priority] ?? 0) + 1
+    })
+    return Object.entries(counts).map(([priority, count]) => ({ priority, count }))
+  },
+
+  async getUserTasksPerMonth(userId: string, months = 6) {
+    const supabase = createClient()
+    const since = new Date()
+    since.setMonth(since.getMonth() - months)
+
+    const { data, error } = await supabase
+      .from('tasks')
+      .select('created_at')
+      .or(`assigned_to.eq.${userId},created_by.eq.${userId}`)
+      .gte('created_at', since.toISOString())
+
+    if (error) throw error
+
+    const counts: Record<string, number> = {}
+    data.forEach((t) => {
+      const month = new Date(t.created_at).toLocaleString('default', { month: 'short', year: '2-digit' })
+      counts[month] = (counts[month] ?? 0) + 1
+    })
+    return Object.entries(counts).map(([month, count]) => ({ month, count }))
+  },
+
+  async getUserAvgCompletionTime(userId: string) {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from('tasks')
+      .select('created_at, updated_at')
+      .or(`assigned_to.eq.${userId},created_by.eq.${userId}`)
+      .in('status', ['completed', 'approved'])
+
+    if (error) throw error
+    if (data.length === 0) return null
+
+    const totalHours = data.reduce((sum, t) => {
+      const diff = new Date(t.updated_at).getTime() - new Date(t.created_at).getTime()
+      return sum + diff / (1000 * 60 * 60)
+    }, 0)
+
+    return Math.round(totalHours / data.length)
+  },
 }

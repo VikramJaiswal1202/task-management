@@ -11,11 +11,16 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { Bell, LogOut, Settings, User } from 'lucide-react'
+import { Bell, LogOut, Search, Settings, User } from 'lucide-react'
 import { logout } from '@/actions/auth'
 import Link from 'next/link'
+import { NotificationBell } from '@/components/features/notifications/notification-bell'
+import { useUIStore } from '@/lib/store/ui-store'
+import { ThemeToggle } from './theme-toggle'
+
 
 export function TopNavbar({ profile }: { profile: Profile }) {
+  const { setCommandPaletteOpen } = useUIStore()
   const initials = profile.full_name
     ? profile.full_name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
     : profile.email[0].toUpperCase()
@@ -25,11 +30,18 @@ export function TopNavbar({ profile }: { profile: Profile }) {
       <div />
 
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" className="relative" asChild>
-          <Link href={profile.role === 'admin' ? '/admin/notifications' : '/dashboard/notifications'}>
-            <Bell className="h-5 w-5" />
-          </Link>
-        </Button>
+        <Button
+  variant="outline"
+  size="sm"
+  className="hidden gap-2 text-muted-foreground sm:flex"
+  onClick={() => setCommandPaletteOpen(true)}
+>
+  <Search className="h-3.5 w-3.5" />
+  Search
+  <kbd className="ml-2 rounded border bg-muted px-1.5 py-0.5 text-xs">⌘K</kbd>
+</Button>
+        <ThemeToggle />
+        <NotificationBell />
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

@@ -11,11 +11,21 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useEffect } from 'react'
+
+
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirectTo') || '/dashboard'
+  const error = searchParams.get('error')
+  useEffect(() => {
+  if (error === 'account_deactivated') {
+    toast.error('Your account has been deactivated. Contact an admin for help.')
+  }
+}, [error])
+  
 
   const {
     register,
@@ -36,6 +46,7 @@ export default function LoginPage() {
       setLoading(false)
     }
   }
+  
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4">

@@ -40,6 +40,22 @@ export async function updateSession(request: NextRequest) {
     url.searchParams.set('redirectTo', pathname)
     return NextResponse.redirect(url)
   }
+  // Block deactivated users from any protected route
+  if (user && isProtectedRoute) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('is_active')
+      .eq('id', user.id)
+      .single()
+
+    if (profile && !profile.is_active) {
+      await supabase.auth.signOut()
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      url.searchParams.set('error', 'account_deactivated')
+      return NextResponse.redirect(url)
+    }
+  }
 
   // Logged in, trying to access auth pages -> redirect to dashboard
   if (user && isAuthRoute) {

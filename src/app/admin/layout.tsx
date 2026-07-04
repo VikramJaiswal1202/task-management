@@ -28,6 +28,7 @@ export default async function AdminLayout({
       <Sidebar profile={profile} />
       <div className="flex flex-1 flex-col overflow-hidden">
         <TopNavbar profile={profile} />
+        
         <main className="flex-1 overflow-y-auto bg-muted/30 p-6">{children}</main>
       </div>
     </div>

@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
+import { useActivityLogs } from '@/hooks/use-activity-logs'
 import {
   Select,
   SelectContent,
@@ -31,6 +32,7 @@ interface TaskFormProps {
 }
 
 export function TaskForm({ open, onOpenChange }: TaskFormProps) {
+  const activityLogs = useActivityLogs()
   const { data: currentUser } = useCurrentUser()
   const { data: users } = useUsers()
   const createTask = useCreateTask()
@@ -67,6 +69,8 @@ export function TaskForm({ open, onOpenChange }: TaskFormProps) {
       assigned_by: data.taskType === 'assigned' ? currentUser.id : null,
       status: 'pending',
     })
+    // Refresh activity logs after creating a task
+    activityLogs?.refetch?.()
 
     reset()
     onOpenChange(false)

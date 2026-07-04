@@ -128,3 +128,32 @@
     @apply font-sans;
   }
 }
+.fc {
+  --fc-border-color: var(--border);
+  --fc-button-bg-color: var(--primary);
+  --fc-button-border-color: var(--primary);
+  --fc-button-hover-bg-color: var(--primary);
+  --fc-button-hover-border-color: var(--primary);
+  --fc-button-active-bg-color: var(--primary);
+  --fc-today-bg-color: var(--muted);
+  font-family: inherit;
+}
+
+.fc .fc-button {
+  opacity: 0.9;
+}
+
+.fc .fc-button:hover {
+  opacity: 1;
+}
+
+.fc-event {
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 1px 4px;
+}
+
+.fc-daygrid-day-number,
+.fc-col-header-cell-cushion {
+  color: var(--foreground);
+}

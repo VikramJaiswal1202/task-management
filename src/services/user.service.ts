@@ -45,23 +45,26 @@ export const userService = {
   },
 
   async getUserTaskStats(userId: string) {
-    const supabase = createClient()
-    const { data, error } = await supabase
-      .from('tasks')
-      .select('status')
-      .or(`assigned_to.eq.${userId},created_by.eq.${userId}`)
+  const supabase = createClient()
+  const { data, error } = await supabase
+    .from('tasks')
+    .select('status')
+    .or(`assigned_to.eq.${userId},created_by.eq.${userId}`)
 
-    if (error) throw error
+  if (error) throw error
 
-    const total = data.length
-    const completed = data.filter((t) => t.status === 'completed' || t.status === 'approved').length
-    const overdue = data.filter((t) => t.status === 'overdue').length
+  const total = data.length
+  const completed = data.filter((t) =>
+    ['completed', 'submitted', 'approved'].includes(t.status)
+  ).length
+  const overdue = data.filter((t) => t.status === 'overdue').length
 
-    return {
-      total,
-      completed,
-      overdue,
-      completionRate: total > 0 ? Math.round((completed / total) * 100) : 0,
-    }
-  },
+  return {
+    total,
+    completed,
+    overdue,
+    completionRate: total > 0 ? Math.round((completed / total) * 100) : 0,
+  }
+},
+  
 }
