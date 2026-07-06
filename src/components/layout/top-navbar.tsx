@@ -17,9 +17,11 @@ import Link from 'next/link'
 import { NotificationBell } from '@/components/features/notifications/notification-bell'
 import { useUIStore } from '@/lib/store/ui-store'
 import { ThemeToggle } from './theme-toggle'
+import { useQueryClient } from '@tanstack/react-query'
 
 
 export function TopNavbar({ profile }: { profile: Profile }) {
+  const queryClient = useQueryClient()
   const { setCommandPaletteOpen } = useUIStore()
   const initials = profile.full_name
     ? profile.full_name.split(' ').map((n) => n[0]).join('').toUpperCase().slice(0, 2)
@@ -74,9 +76,15 @@ export function TopNavbar({ profile }: { profile: Profile }) {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => logout()} className="text-destructive focus:text-destructive">
+            <DropdownMenuItem
+              onClick={() => {
+                queryClient.clear()
+                logout()
+              }}
+              className="text-destructive focus:text-destructive"
+            >
               <LogOut className="mr-2 h-4 w-4" />
-              Log out
+                Log out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

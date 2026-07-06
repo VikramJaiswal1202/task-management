@@ -18,7 +18,8 @@ export const taskService = {
       .select(`
         *,
         assigned_to_profile:profiles!tasks_assigned_to_fkey(*),
-        created_by_profile:profiles!tasks_created_by_fkey(*)
+        created_by_profile:profiles!tasks_created_by_fkey(*),
+        assigned_by_profile:profiles!tasks_assigned_by_fkey(*)
       `)
 
     if (role !== 'admin') {
@@ -79,7 +80,8 @@ export const taskService = {
       .select(`
         *,
         assigned_to_profile:profiles!tasks_assigned_to_fkey(*),
-        created_by_profile:profiles!tasks_created_by_fkey(*)
+        created_by_profile:profiles!tasks_created_by_fkey(*),
+        assigned_by_profile:profiles!tasks_assigned_by_fkey(*)
       `)
       .eq('id', id)
       .single()
@@ -176,7 +178,12 @@ export const taskService = {
 
     let query = supabase
       .from('tasks')
-      .select(`*, assigned_to_profile:profiles!tasks_assigned_to_fkey(*)`)
+      .select(`
+        *,
+        assigned_to_profile:profiles!tasks_assigned_to_fkey(*),
+        created_by_profile:profiles!tasks_created_by_fkey(*),
+        assigned_by_profile:profiles!tasks_assigned_by_fkey(*)
+      `)
 
     if (role !== 'admin') {
       query = query.or(`assigned_to.eq.${userId},created_by.eq.${userId}`)
@@ -199,4 +206,20 @@ export const taskService = {
     if (error) throw error
     return data as unknown as TaskWithProfiles[]
   },
+  async getTeamTasks(teamId: string): Promise<TaskWithProfiles[]> {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from('tasks')
+      .select(`
+        *,
+        assigned_to_profile:profiles!tasks_assigned_to_fkey(*),
+        created_by_profile:profiles!tasks_created_by_fkey(*)
+      `)
+      .in('assigned_to', (await supabase.from('profiles').select('id').eq('team_id', teamId)).data?.map(p => p.id) ?? [])
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return data as unknown as TaskWithProfiles[]
+  },
+  
 }

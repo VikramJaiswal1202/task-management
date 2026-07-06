@@ -12,10 +12,12 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useEffect } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 
 
 
 export default function LoginPage() {
+  const queryClient = useQueryClient()
   const [loading, setLoading] = useState(false)
   const searchParams = useSearchParams()
   const redirectTo = searchParams.get('redirectTo') || '/dashboard'
@@ -35,6 +37,7 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginInput) => {
     setLoading(true)
+    queryClient.clear()
     const formData = new FormData()
     formData.append('email', data.email)
     formData.append('password', data.password)

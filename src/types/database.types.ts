@@ -167,8 +167,10 @@ export type Database = {
           full_name: string | null
           id: string
           is_active: boolean
+          is_team_lead: boolean
           phone: string | null
           role: Database["public"]["Enums"]["user_role"]
+          team_id: string | null
           timezone: string | null
           updated_at: string
         }
@@ -180,8 +182,10 @@ export type Database = {
           full_name?: string | null
           id: string
           is_active?: boolean
+          is_team_lead?: boolean
           phone?: string | null
           role?: Database["public"]["Enums"]["user_role"]
+          team_id?: string | null
           timezone?: string | null
           updated_at?: string
         }
@@ -193,12 +197,22 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_active?: boolean
+          is_team_lead?: boolean
           phone?: string | null
           role?: Database["public"]["Enums"]["user_role"]
+          team_id?: string | null
           timezone?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       task_reports: {
         Row: {
@@ -346,12 +360,47 @@ export type Database = {
           },
         ]
       }
+      teams: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teams_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      get_user_team_id: { Args: never; Returns: string }
       is_admin: { Args: never; Returns: boolean }
+      is_team_lead: { Args: never; Returns: boolean }
+      lock_overdue_tasks: { Args: never; Returns: undefined }
     }
     Enums: {
       task_priority: "low" | "medium" | "high" | "urgent"

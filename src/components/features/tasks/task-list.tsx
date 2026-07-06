@@ -56,21 +56,26 @@ export function TaskList() {
             className="flex items-center justify-between rounded-lg border bg-background p-4 transition-colors hover:bg-muted/50"
           >
             <div className="flex-1 space-y-1">
-              <div className="flex items-center gap-2">
-                {task.locked && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
-                <h3 className="font-medium">{task.title}</h3>
-              </div>
-              {task.description && (
-                <p className="line-clamp-1 text-sm text-muted-foreground">{task.description}</p>
-              )}
-              <div className={cn('flex items-center gap-1 text-xs text-muted-foreground', overdue && 'text-destructive')}>
-                <Calendar className="h-3 w-3" />
-                <span>
-                  {overdue ? 'Overdue: ' : 'Due '}
-                  {formatDistanceToNow(new Date(task.deadline), { addSuffix: true })}
-                </span>
-              </div>
-            </div>
+  <div className="flex items-center gap-2">
+    {task.locked && <Lock className="h-3.5 w-3.5 text-muted-foreground" />}
+    <h3 className="font-medium">{task.title}</h3>
+  </div>
+  {task.description && (
+    <p className="line-clamp-1 text-sm text-muted-foreground">{task.description}</p>
+  )}
+  <div className={cn('flex items-center gap-1 text-xs text-muted-foreground', overdue && 'text-destructive')}>
+    <Calendar className="h-3 w-3" />
+    <span>
+      {overdue ? 'Overdue: ' : 'Due '}
+      {formatDistanceToNow(new Date(task.deadline), { addSuffix: true })}
+    </span>
+  </div>
+  {task.task_type === 'assigned' && task.assigned_by_profile && (
+    <p className="text-xs text-muted-foreground">
+      Assigned by <span className="font-medium">{task.assigned_by_profile.full_name}</span>
+    </p>
+  )}
+</div>
 
             <div className="flex items-center gap-2">
               <PriorityBadge priority={task.priority} />

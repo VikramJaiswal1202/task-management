@@ -139,20 +139,27 @@ export default function TaskDetailPage() {
         )}
 
         <div className="grid grid-cols-2 gap-4 text-sm">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-            <span className={overdue ? 'font-medium text-destructive' : ''}>
-              Due {format(new Date(task.deadline), 'PPP p')}
-            </span>
-          </div>
+  <div className="flex items-center gap-2">
+    <Calendar className="h-4 w-4 text-muted-foreground" />
+    <span className={overdue ? 'font-medium text-destructive' : ''}>
+      Due {format(new Date(task.deadline), 'PPP p')}
+    </span>
+  </div>
 
-          {task.assigned_to_profile && (
-            <div className="flex items-center gap-2">
-              <User className="h-4 w-4 text-muted-foreground" />
-              <span>Assigned to {task.assigned_to_profile.full_name}</span>
-            </div>
-          )}
-        </div>
+  {task.assigned_to_profile && (
+    <div className="flex items-center gap-2">
+      <User className="h-4 w-4 text-muted-foreground" />
+      <span>Assigned to {task.assigned_to_profile.full_name}</span>
+    </div>
+  )}
+
+  {task.task_type === 'assigned' && task.assigned_by_profile && (
+    <div className="flex items-center gap-2">
+      <User className="h-4 w-4 text-muted-foreground" />
+      <span>Assigned by {task.assigned_by_profile.full_name}</span>
+    </div>
+  )}
+</div>
 
         {(canMarkComplete || canSubmitReport) && (
           <>

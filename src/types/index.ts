@@ -15,7 +15,11 @@ export type TaskPriority = Database['public']['Enums']['task_priority']
 export type TaskStatus = Database['public']['Enums']['task_status']
 export type TaskType = Database['public']['Enums']['task_type']
 
+export type Team = Database['public']['Tables']['teams']['Row']
+export type TeamInsert = Database['public']['Tables']['teams']['Insert']
+
 export type TaskWithProfiles = Task & {
   assigned_to_profile?: Profile | null
   created_by_profile?: Profile | null
+  assigned_by_profile?: Profile | null
 }

@@ -106,3 +106,10 @@ export function useRejectReport() {
     },
   })
 }
+export function useTeamReports(teamId: string) {
+  return useQuery({
+    queryKey: [...queryKeys.reports.all, 'team', teamId],
+    queryFn: () => reportService.getTeamReports(teamId),
+    enabled: !!teamId,
+  })
+}

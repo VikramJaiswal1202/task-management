@@ -219,3 +219,10 @@ export function useActiveAssignedTasks(userId: string) {
     enabled: !!userId,
   })
 }
+export function useTeamTasks(teamId: string) {
+  return useQuery({
+    queryKey: [...queryKeys.tasks.all, 'team', teamId],
+    queryFn: () => taskService.getTeamTasks(teamId),
+    enabled: !!teamId,
+  })
+}

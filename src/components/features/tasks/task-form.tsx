@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { useActivityLogs } from '@/hooks/use-activity-logs'
+import { useTeamMembers } from '@/hooks/use-teams'
 import {
   Select,
   SelectContent,
@@ -26,6 +27,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 
+
 interface TaskFormProps {
   open: boolean
   onOpenChange: (open: boolean) => void
@@ -37,6 +39,11 @@ export function TaskForm({ open, onOpenChange }: TaskFormProps) {
   const { data: users } = useUsers()
   const createTask = useCreateTask()
   const isAdmin = currentUser?.profile.role === 'admin'
+  const isTeamLead = currentUser?.profile.is_team_lead
+  const { data: teamMembers } = useTeamMembers(currentUser?.profile.team_id ?? '')
+
+  const canAssign = isAdmin || isTeamLead
+  const assignableUsers = isAdmin ? users : teamMembers
 
   const {
     register,
@@ -123,7 +130,7 @@ export function TaskForm({ open, onOpenChange }: TaskFormProps) {
             </div>
           </div>
 
-          {isAdmin && (
+          {canAssign && (
             <div className="space-y-2">
               <Label>Task Type</Label>
               <Select
@@ -141,7 +148,7 @@ export function TaskForm({ open, onOpenChange }: TaskFormProps) {
             </div>
           )}
 
-          {isAdmin && taskType === 'assigned' && (
+          {canAssign && taskType === 'assigned' && (
             <div className="space-y-2">
               <Label>Assign to</Label>
               <Select onValueChange={(val) => setValue('assignedTo', val)}>
@@ -149,7 +156,7 @@ export function TaskForm({ open, onOpenChange }: TaskFormProps) {
                   <SelectValue placeholder="Select a user" />
                 </SelectTrigger>
                 <SelectContent>
-                  {users?.map((u) => (
+                  {assignableUsers?.map((u) => (
                     <SelectItem key={u.id} value={u.id}>
                       {u.full_name} ({u.email})
                     </SelectItem>

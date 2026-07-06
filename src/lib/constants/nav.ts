@@ -8,6 +8,7 @@ import {
   Settings,
   FileText,
   ClipboardList,
+  Users2,
 } from 'lucide-react'
 
 export const userNavItems = [
@@ -23,6 +24,7 @@ export const adminNavItems = [
   { title: 'All Tasks', href: '/admin/tasks', icon: ListTodo },
   { title: 'Reports', href: '/admin/reports', icon: FileText },
   { title: 'Users', href: '/admin/users', icon: Users },
+  { title: 'Teams', href: '/admin/teams', icon: Users2 },
   { title: 'Analytics', href: '/admin/analytics', icon: BarChart3 },
   { title: 'Calendar', href: '/admin/calendar', icon: Calendar },
   { title: 'Activity Log', href: '/admin/activity', icon: ClipboardList },

@@ -88,4 +88,17 @@ export const reportService = {
 
     return data
   },
+  async getTeamReports(teamId: string): Promise<TaskReport[]> {
+    const supabase = createClient()
+    const memberIds = (await supabase.from('profiles').select('id').eq('team_id', teamId)).data?.map(p => p.id) ?? []
+
+    const { data, error } = await supabase
+      .from('task_reports')
+      .select(`*, task:tasks(*), submitted_by_profile:profiles!task_reports_submitted_by_fkey(*)`)
+      .in('submitted_by', memberIds)
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return data as unknown as TaskReport[]
+  },  
 }

@@ -8,13 +8,21 @@ import { userNavItems, adminNavItems } from '@/lib/constants/nav'
 import { Profile } from '@/types'
 import { ChevronLeft, ChevronRight, CheckSquare } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Users2 } from 'lucide-react'
 
 export function Sidebar({ profile }: { profile: Profile }) {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
+  const baseNavItems = profile.role === 'admin' ? adminNavItems : userNavItems
+  const navItems = profile.is_team_lead
+  ? [
+      ...baseNavItems.slice(0, 2),
+      { title: 'My Team', href: '/dashboard/team', icon: Users2 },
+      ...baseNavItems.slice(2),
+    ]
+  : baseNavItems
 
-  const navItems = profile.role === 'admin' ? adminNavItems : userNavItems
-
+  
   return (
     <aside
       className={cn(
