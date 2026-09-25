@@ -45,7 +45,7 @@ export default function ForgotPasswordPage() {
             We&apos;ve sent a password reset link to your email.
           </p>
           <Link href="/login" className="text-sm underline">
-            Back to login
+            Back to login   
           </Link>
         </div>
       </div>
